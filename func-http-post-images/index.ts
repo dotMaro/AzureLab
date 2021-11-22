@@ -17,49 +17,43 @@ const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<HttpResponse> {
-  context.log("HTTP trigger function processed a request.");
+  try {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(
+      process.env.IMAGE_STORAGE_ACCOUNT_CONNECTION_STRING
+    );
 
-  if (req.headers["content-type"] !== "application/octet-stream") {
+    const containerName = "images";
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+
+    const imageId = uuidv4();
+    const imagePath = imageId + ".png";
+    const blockBlobClient = containerClient.getBlockBlobClient(imagePath);
+
+    await blockBlobClient.upload(req.body, req.body.length);
+    context.log("Successfully uploaded image", imageId);
+
+    const image: Image = {
+      id: imageId,
+      uri: blockBlobClient.url,
+    };
+    context.bindings.outputImageDocument = image;
+    context.bindings.outputMessage = image;
+
     const response: HttpResponse = {
-      status: 400,
+      status: 201,
       headers: {
         "Content-Type": "application/json",
       },
-      body: { error: "Content-Type should be application/octet-stream" },
+      body: image,
     };
-    context.log("Bad content-type", req.headers["content-type"]);
+    return response;
+  } catch (err) {
+    context.log.error("Internal server error when storing image");
+    const response: HttpResponse = {
+      status: 500,
+    };
     return response;
   }
-
-  const blobServiceClient = BlobServiceClient.fromConnectionString(
-    process.env.IMAGE_STORAGE_ACCOUNT_CONNECTION_STRING
-  );
-
-  const containerName = "images";
-  const containerClient = blobServiceClient.getContainerClient(containerName);
-
-  const imageId = uuidv4();
-  const imagePath = imageId + ".png";
-  const blockBlobClient = containerClient.getBlockBlobClient(imagePath);
-
-  await blockBlobClient.upload(req.body, req.body.length);
-  context.log("Successfully uploaded image", imageId);
-
-  const image: Image = {
-    id: imageId,
-    uri: blockBlobClient.url,
-  };
-  context.bindings.outputImageDocument = image;
-  context.bindings.outputMessage = image;
-
-  const response: HttpResponse = {
-    status: 201,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: image,
-  };
-  return response;
 };
 
 export default httpTrigger;
