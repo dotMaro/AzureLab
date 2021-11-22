@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "get"
+      ],
+      "route": "images/{id}"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "in",
+      "name": "image",
+      "databaseName": "image",
+      "collectionName": "image",
+      "connectionStringSetting": "IMAGE_COSMOS_CONNECTION_STRING",
+      "sqlQuery": "SELECT c.id, c.uri FROM c WHERE c.id={id}"
+    }
+  ],
+  "scriptFile": "../dist/func-http-get-images-id/index.js"
+}

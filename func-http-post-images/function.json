@@ -1,0 +1,35 @@
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "post"
+      ],
+      "route": "images"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "out",
+      "name": "outputImageDocument",
+      "databaseName": "image",
+      "collectionName": "image",
+      "connectionStringSetting": "IMAGE_COSMOS_CONNECTION_STRING"
+    },
+    {
+      "type": "serviceBus",
+      "direction": "out",
+      "connection": "IMAGE_SERVICEBUS_CONNECTION_STRING",
+      "name": "outputMessage",
+      "queueName": "thumbnailqueue"
+    }
+  ],
+  "scriptFile": "../dist/func-http-post-images/index.js"
+}

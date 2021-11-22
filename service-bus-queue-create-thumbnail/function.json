@@ -1,0 +1,46 @@
+{
+  "bindings": [
+    {
+      "name": "message",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "thumbnailqueue",
+      "connection": "IMAGE_SERVICEBUS_CONNECTION_STRING"
+    },
+    {
+      "type": "blob",
+      "direction": "in",
+      "name": "imageBlob",
+      "path": "images/{id}.png",
+      "dataType": "binary",
+      "connection": "IMAGE_STORAGE_ACCOUNT_CONNECTION_STRING"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "in",
+      "name": "imageDocument",
+      "databaseName": "image",
+      "collectionName": "image",
+      "connectionStringSetting": "IMAGE_COSMOS_CONNECTION_STRING",
+      "id": "{id}",
+      "partitionKey": "{id}",
+      "sqlQuery": ""
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "out",
+      "name": "outputImageDocument",
+      "databaseName": "image",
+      "collectionName": "image",
+      "connectionStringSetting": "IMAGE_COSMOS_CONNECTION_STRING"
+    },
+    {
+      "type": "blob",
+      "direction": "out",
+      "name": "outputThumbnail",
+      "path": "thumbnails/{id}.png",
+      "connection": "IMAGE_STORAGE_ACCOUNT_CONNECTION_STRING"
+    }
+  ],
+  "scriptFile": "../dist/service-bus-queue-create-thumbnail/index.js"
+}
